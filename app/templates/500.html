@@ -1,0 +1,15 @@
+{% extends "layouts/public_base.html" %}
+{% block content %}
+<main>
+    <div class="container mt-4">
+        <div class="card">
+            <h5 class="card-header">{{ _('An Error Occurred...') }}</h5>
+            <div class="card-body">
+                <h5 class="card-title">500</h5>
+                <p class="card-text">{{ _("We're sorry, but our application encountered an error that could not be recovered. You can go back and try your action again, or choose another option.") }}</p>
+                <a href="{{ url_for('index_route') }}" class="btn btn-primary">{{ _('Home') }}</a>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
