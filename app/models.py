@@ -11,6 +11,8 @@ user_status = ('created', 'invited', 'active', 'inactive', 'suspended', 'deleted
 user_status_enum = Enum(*user_status, name='user_status')
 crew_status = ('created', 'active', 'inactive', 'suspended', 'deleted')
 crew_status_enum = Enum(*crew_status, name='crew_status')
+message_status = ('created', 'listened_to', 'deleted')
+message_status_enum = Enum(*message_status, name='message_status')
 
 roles_users = db.Table('roles_users',
     db.Column('user_id', db.String(), db.ForeignKey('users.id')),
@@ -99,6 +101,7 @@ class Crews(db.Model):
     created = db.Column(db.DateTime, default=datetime.utcnow)
     status = db.Column(crew_status_enum)
     members = db.relationship('Users', backref='crew', lazy='dynamic')
+    messages = db.relationship('Messages', backref='messages', lazy='dynamic')
 
     def __init__(self, **kwargs):
         app.logger.debug("Init Crew")
@@ -127,3 +130,43 @@ class Crews(db.Model):
                 satisfied = True
         return str_set
 
+class Messages(db.Model):
+    id = db.Column(db.String(40), primary_key=True,  default=str(uuid.uuid1()))
+    url = db.Column(db.String)
+    listen_count = db.Column(db.Integer, default=0)
+    created = db.Column(db.DateTime, default=datetime.utcnow)
+    status = db.Column(message_status_enum)
+    crew_id = db.Column(db.String, db.ForeignKey('crews.id'))
+
+    def __init__(self, **kwargs):
+        app.logger.debug("Init Message")
+        super(Messages, self).__init__(**kwargs)
+        self.id = str(uuid.uuid1())
+        self.created = datetime.utcnow()
+        self.status = 'created'
+
+    def increment_listen_count(self):
+        old_count = self.listen_count
+        self.listen_count = old_count + 1
+        db.session.commit()
+    
+    def to_dict(self):
+        data = {
+            'id': self.id,
+            'url': self.url,
+            'status': self.status,
+            'created': self.created,
+        }
+        return data
+    
+    @staticmethod
+    def make_ordered_list(obj):
+        """
+        We want to convert a list of Message objects to a list of dicts that contain 
+        each Message obj vars. 
+        This is primarily so we can store this in a session. 
+        """
+        ordered_list = []
+        for item in obj:
+            ordered_list.append(item.to_dict())
+        return ordered_list

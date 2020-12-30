@@ -18,3 +18,6 @@ class Config(object):
     SECURITY_SEND_PASSWORD_CHANGE_EMAIL = False
     SECURITY_SEND_REGISTER_EMAIL = False #temp change before prod
     CREW_ACCOUNT_PIN_LENGTH = os.environ.get('CREW_ACCOUNT_PIN_LENGTH') or 6
+    TWILIO_VOICE_SETTING = os.environ.get('TWILIO_VOICE_SETTING') or 'Polly.Matthew'
+    TWILIO_RECORDING_MAXLENGTH = os.environ.get('TWILIO_RECORDING_MAXLENGTH') or 300
+    TWILIO_INBOUND_NUMBER = os.environ.get('TWILIO_INBOUND_NUMBER')
