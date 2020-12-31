@@ -52,6 +52,7 @@ class Users(db.Model, UserMixin):
     password = db.Column(db.String(255))
     active = db.Column(db.Boolean())
     confirmed = db.Column(db.DateTime())
+    access_code = db.Column(db.String)
     roles = db.relationship('Role', secondary=roles_users, backref=db.backref('user', lazy='dynamic'))
     crew_id = db.Column(db.String, db.ForeignKey('crews.id'))
 
@@ -129,6 +130,20 @@ class Crews(db.Model):
             else:
                 satisfied = True
         return str_set
+    
+    def gather_access_codes(self):
+        """
+        Since a "protected" account can be accessed by either the Crew's global access code or 
+        a Crew member's individual code, we're going to simply gather them all and return them 
+        in a list. Then our verification routine will just look for provided_code in list. 
+        """
+        code_list = [str(self.access_code)]
+        member_codes = Users.query.filter_by(crew_id=self.id).filter(Users.access_code.isnot(None)).all()
+
+        if member_codes:
+            for code in member_codes:
+                code_list.append(code.access_code)
+        return code_list
 
 class Messages(db.Model):
     id = db.Column(db.String(40), primary_key=True,  default=str(uuid.uuid1()))

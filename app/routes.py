@@ -9,7 +9,7 @@ from flask_security.utils import encrypt_password, verify_password, hash_passwor
 from flask_security.decorators import roles_required, roles_accepted
 import os
 from app.models import Users, Role, Crews, Messages
-from twilio.twiml.voice_response import VoiceResponse, Say, Gather, Record, Play
+from twilio.twiml.voice_response import VoiceResponse, Say, Gather, Record, Play, Hangup
 from twilio.rest import Client
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -155,11 +155,17 @@ def account_lookup_route():
     if 'Digits' in request.values:
         provided_pin = str(request.values['Digits'])
         crew = Crews.query.filter_by(account_pin=provided_pin).first()
-        app.logger.debug(crew) 
+        
+        # basic pin brute force protection that limits tries to 4
+        if 'account_pin_tries' in session and session['account_pin_tries'] == 5:
+            return redirect(url_for('hangup_route'), code=307)
         
         if crew is None:
             # crew not found or bad pin
-            # we need to implement the session retry here
+            if not 'account_pin_tries' in session:
+                session['account_pin_tries'] = 1
+            else:
+                session['account_pin_tries'] += 1
             gather = Gather(action=app.config['APP_BASE_URL'] + url_for('account_lookup_route'), method='POST', input="dtmf", timeout=3, finishOnKey='#')
             gather.say(f"Your input was not correct. Please input your account pin and then press the pound key.", voice=app.config['TWILIO_VOICE_SETTING'])
             resp.append(gather)
@@ -178,16 +184,46 @@ def account_lookup_route():
     resp.append(gather)
     return str(resp)
 
-@app.route('/check-pin', methods=['POST'])
+@app.route('/check-pin', methods=['GET', 'POST'])
 def check_pin_route():
     '''
-    If the Crew account is "protected" and the session var 'Protected_Session' is set to False, then we must direct to 
-    this endpoint for collection of the account Access Code. This endpoint will convert the session var to True on success and 
-    then redirect to the 'main_menu_route'. 
-
-    This endpoint contains a basic brute force protection which will only allow 3 attempts before ending the call.  
+    If the Crew account is "protected" then we must direct to this endpoint for collection of the account Access Code.  
+    Since the user may use either the Crew acccess code or their individual access code, we have a Crews func that will 
+    gather up all possible codes and load them in a list. We just check the list to see if what the user input matches any 
+    of the entries. Again, not super secure, this is just a best intentions effort to protect messages. 
+    This endpoint contains a basic brute force protection which will only allow 4 attempts before ending the call.  
     '''
-    pass
+    resp = VoiceResponse()
+
+    if not 'sessionCrewId' in session:
+        return redirect(url_for('hangup_route'), code=307)
+    else:
+        crew = Crews.query.get(session['sessionCrewId'])
+        codes_list = crew.gather_access_codes()
+    
+    if 'Digits' in request.values:
+        # basic pin brute force protection that limits tries to 4
+        if 'access_code_tries' in session and session['access_code_tries'] == 5:
+            return redirect(url_for('hangup_route'), code=307)
+        
+        provided_code = str(request.values['Digits'])
+        if provided_code in codes_list:
+            # all is good, send to the menu
+            return redirect(url_for('main_menu_route'), code=307)
+        else:
+            if not 'access_code_tries' in session:
+                session['access_code_tries'] = 1
+            else:
+                session['access_code_tries'] += 1
+            gather = Gather(action=app.config['APP_BASE_URL'] + url_for('check_pin_route'), method='POST', input="dtmf", timeout=3, finishOnKey='#')
+            gather.say(f"Your input was not correct. Please input your access code and then press the pound key.", voice=app.config['TWILIO_VOICE_SETTING'])
+            resp.append(gather)
+            return str(resp)
+
+    gather = Gather(action=app.config['APP_BASE_URL'] + url_for('check_pin_route'), method='POST', input="dtmf", timeout=3, finishOnKey='#')
+    gather.say("This account is protected. Please enter the access code, followed by the pound sign.", voice=app.config['TWILIO_VOICE_SETTING'])
+    resp.append(gather)
+    return str(resp)
 
 @app.route('/main-menu', methods=['GET', 'POST'])
 def main_menu_route():
@@ -308,6 +344,18 @@ def play_route():
     resp.append(gather)
     return str(resp)
 
+@app.route('/hangup', methods=['GET', 'POST'])
+def hangup_route():
+    '''
+    We don't need a hangup route, but having one would be nice so we can clean up 
+    the sessions and end the call properly.   
+    '''
+    session.clear()
+
+    resp = VoiceResponse()
+    hangup = Hangup()
+    resp.append(hangup)
+    return str(resp)
 
 @app.errorhandler(404)
 def page_not_found(e):
