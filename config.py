@@ -21,3 +21,5 @@ class Config(object):
     TWILIO_VOICE_SETTING = os.environ.get('TWILIO_VOICE_SETTING') or 'Polly.Matthew'
     TWILIO_RECORDING_MAXLENGTH = os.environ.get('TWILIO_RECORDING_MAXLENGTH') or 300
     TWILIO_INBOUND_NUMBER = os.environ.get('TWILIO_INBOUND_NUMBER')
+    TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID')
+    TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN')

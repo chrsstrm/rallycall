@@ -10,6 +10,7 @@ from flask_security.decorators import roles_required, roles_accepted
 import os
 from app.models import Users, Role, Crews, Messages
 from twilio.twiml.voice_response import VoiceResponse, Say, Gather, Record, Play
+from twilio.rest import Client
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 user_datastore = SQLAlchemyUserDatastore(db, Users, Role)
@@ -21,6 +22,8 @@ def bootstrap_app():
 
     On first request we want to make sure our app is properly bootstrapped. 
     This involves setting up our user roles and pre-generating an admin user. 
+    We also want to make sure our Twilio inbound number webhook is properly set (you will have 
+    to set up your Twilio account and buy a number prior to booting this app.)
 
     We have three roles: 
     1. System Admin - The super admin who controls the entire system - unlimited permissions. 
@@ -56,6 +59,32 @@ def bootstrap_app():
         admin_user = user_datastore.find_user(email=bootstrap_email)
         user_datastore.add_role_to_user(admin_user, admin)
         db.session.commit()
+    # Update our Twilio account to make sure the inbound number we're using for this app 
+    # has a proper webhook setting. 
+    number_sid = ''
+    try:
+        client = Client(app.config['TWILIO_ACCOUNT_SID'], app.config['TWILIO_AUTH_TOKEN'])
+        incoming_phone_numbers = client.incoming_phone_numbers.list(phone_number=app.config['TWILIO_INBOUND_NUMBER'], limit=1)
+        for record in incoming_phone_numbers:
+            number_sid = record.sid
+    except Exception as _:
+        app.logger.debug("Attempt to find given Twilio number failed. Check account credentials and Twilio Inbound Number and try again.")
+    
+    try:
+        # Set the webhook for our inbound number to the 'account_lookup_route' entrypoint for our inbound calls. 
+        # This block will make sure that our Twilio account is always up to date in terms of what the fqd 
+        # endpoint is. This makes it easy to port this app from dev to prod and even to new domains without 
+        # having to log into Twilio and make changes manually. 
+        # The SMS URL is deliberately set to the empty string to reject any SMS sent to the number. 
+        _ = client \
+            .incoming_phone_numbers(number_sid) \
+            .update(
+                sms_url='',
+                voice_method='POST',
+                voice_url=url_for('account_lookup_route', _external=True, _scheme='https')
+            )
+    except Exception as _:
+        app.logger.debug("Could not update Twilio inbound number properties")
 
 @app.context_processor
 def inject_crew():
