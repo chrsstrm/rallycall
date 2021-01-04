@@ -128,6 +128,7 @@ def user_registered_sighandler(sender, user, confirm_token):
     user.crew_id = crew.id
     db.session.add(crew)
     db.session.commit()
+    login_user(user)
 
 @app.route('/home')
 def home_route():
@@ -241,8 +242,7 @@ def main_menu_route():
     session['messages'] = None
     # at this point sessionCrew should be set, if not, kill
     if session['sessionCrewId'] is None:
-        # we should redirect to a hangup endpoint so we can clear the session in one central place.
-        return 404
+        return redirect(url_for('hangup_route'), code=307)
     else:
         crew = Crews.query.get(session['sessionCrewId'])
         # need to adjust this to exclude 'deleted' status messages

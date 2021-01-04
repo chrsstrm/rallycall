@@ -1,0 +1,52 @@
+{% extends "layouts/public_base.html" %}
+{% block content %}
+{% from "security/_macros.html" import render_field_with_errors, render_field %}
+{% include "security/_messages.html" %}
+<div class="container mt-4">
+    <h1>{{ _('Register') }}</h1>
+    <div class="container-fluid mt-3 mb-3">
+        <p>We refer to a group of people who will share a message account as a Crew. Each Crew must have an administrator. By registering for an account, you will be creating a new Crew and you will be the administrator. After you register, you may 
+            share your Crew's account details with anyone you wish to be in your Crew (there is no requirement for additional members to register.)</p>
+        <p>If you are already a member of a Crew, you do not need to register for an account, simply ask your Crew administrator what the Crew's account details are.</p>
+    </div>
+    <form action="{{ url_for_security('register') }}" method="POST" name="register_user_form">
+    {{ register_user_form.hidden_tag() }}
+    {{ register_user_form.email.label(class_="sr-only mt-1") }}
+    {% if register_user_form.email.errors %}
+    {{ register_user_form.email(placeholder='Email', class_="form-control is-invalid text-dark mb-3") }}
+    {% for error in register_user_form.email.errors %}
+    <div class="alert alert-danger">{{error}}</div>
+    {% endfor %}
+    {% else %}
+    {{ register_user_form.email(placeholder='Username or Email', class_="form-control text-dark mb-3") }}
+    {% endif %}
+
+    {{ register_user_form.password.label(class_="sr-only mt-1") }}
+    {% if register_user_form.password.errors %}
+    {{ register_user_form.password(placeholder='Password', class_="form-control is-invalid text-dark mb-3") }}
+    
+    {% for error in register_user_form.password.errors %}
+    <div class="alert alert-danger">{{error}}</div>
+    {% endfor %}
+    {% else %}
+    {{ register_user_form.password(placeholder='Password', class_="form-control text-dark mb-3") }}
+    
+    {% endif %}
+
+    {% if register_user_form.password_confirm %}
+        {{ register_user_form.password_confirm.label(class_="sr-only mt-1") }}
+        {% if register_user_form.password_confirm.errors %}
+        {{ register_user_form.password_confirm(placeholder='Password', class_="form-control is-invalid text-dark mb-3") }}
+        
+        {% for error in register_user_form.password_confirm.errors %}
+        <div class="alert alert-danger">{{error}}</div>
+        {% endfor %}
+        {% else %}
+        {{ register_user_form.password_confirm(placeholder='Password', class_="form-control text-dark mb-3") }}
+        
+        {% endif %}
+    {% endif %}
+    {{ register_user_form.submit(class_="btn btn-lg btn-primary btn-block") }}
+    </form>
+</div>
+{% endblock %}
