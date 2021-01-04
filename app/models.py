@@ -102,7 +102,7 @@ class Crews(db.Model):
     created = db.Column(db.DateTime, default=datetime.utcnow)
     status = db.Column(crew_status_enum)
     members = db.relationship('Users', backref='crew', lazy='dynamic')
-    messages = db.relationship('Messages', backref='messages', lazy='dynamic')
+    messages = db.relationship('Messages', back_populates="crew", order_by="desc(Messages.created)")
 
     def __init__(self, **kwargs):
         app.logger.debug("Init Crew")
@@ -152,6 +152,7 @@ class Messages(db.Model):
     created = db.Column(db.DateTime, default=datetime.utcnow)
     status = db.Column(message_status_enum)
     crew_id = db.Column(db.String, db.ForeignKey('crews.id'))
+    crew = db.relationship("Crews", back_populates="messages")
 
     def __init__(self, **kwargs):
         app.logger.debug("Init Message")
@@ -185,3 +186,20 @@ class Messages(db.Model):
         for item in obj:
             ordered_list.append(item.to_dict())
         return ordered_list
+
+class AppSafeConfig(object):
+    """
+    Instantiate an object of safe env vars we can use in templates. 
+    """
+    def __init__(self):
+        self.app_name = app.config['APP_NAME']
+        self.app_inbound_number = app.config['TWILIO_INBOUND_NUMBER']
+        self.pretty_app_inbound_number = self.pretty_phone()
+    
+    def pretty_phone(self):
+        fancy_num = re.search(r'^(?P<country>\+\d{1})(?P<area>\d{3})(?P<prefix>\d{3})(?P<subscriber>\d{4})$', self.app_inbound_number, flags=re.IGNORECASE)
+        if fancy_num:
+            normalized = f"{str(fancy_num.group('country'))} ({str(fancy_num.group('area'))}) {str(fancy_num.group('prefix'))}-{str(fancy_num.group('subscriber'))}"
+            return normalized
+        else:
+            return self.app_inbound_number

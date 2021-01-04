@@ -1,141 +1,77 @@
 {% extends "layouts/protected_base.html" %}
 {% block content %}
 <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+    {% include 'includes/flash_messages.html' %}
     <div
         class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">Dashboard</h1>
+        <h1 class="h2">{{ _('Dashboard') }}</h1>
         <div class="btn-toolbar mb-2 mb-md-0">
             
         </div>
     </div>
 
-    <h2>Section title</h2>
-    <div class="table-responsive">
-        <table class="table table-striped table-sm">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Header</th>
-                    <th>Header</th>
-                    <th>Header</th>
-                    <th>Header</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>1,001</td>
-                    <td>Lorem</td>
-                    <td>ipsum</td>
-                    <td>dolor</td>
-                    <td>sit</td>
-                </tr>
-                <tr>
-                    <td>1,002</td>
-                    <td>amet</td>
-                    <td>consectetur</td>
-                    <td>adipiscing</td>
-                    <td>elit</td>
-                </tr>
-                <tr>
-                    <td>1,003</td>
-                    <td>Integer</td>
-                    <td>nec</td>
-                    <td>odio</td>
-                    <td>Praesent</td>
-                </tr>
-                <tr>
-                    <td>1,003</td>
-                    <td>libero</td>
-                    <td>Sed</td>
-                    <td>cursus</td>
-                    <td>ante</td>
-                </tr>
-                <tr>
-                    <td>1,004</td>
-                    <td>dapibus</td>
-                    <td>diam</td>
-                    <td>Sed</td>
-                    <td>nisi</td>
-                </tr>
-                <tr>
-                    <td>1,005</td>
-                    <td>Nulla</td>
-                    <td>quis</td>
-                    <td>sem</td>
-                    <td>at</td>
-                </tr>
-                <tr>
-                    <td>1,006</td>
-                    <td>nibh</td>
-                    <td>elementum</td>
-                    <td>imperdiet</td>
-                    <td>Duis</td>
-                </tr>
-                <tr>
-                    <td>1,007</td>
-                    <td>sagittis</td>
-                    <td>ipsum</td>
-                    <td>Praesent</td>
-                    <td>mauris</td>
-                </tr>
-                <tr>
-                    <td>1,008</td>
-                    <td>Fusce</td>
-                    <td>nec</td>
-                    <td>tellus</td>
-                    <td>sed</td>
-                </tr>
-                <tr>
-                    <td>1,009</td>
-                    <td>augue</td>
-                    <td>semper</td>
-                    <td>porta</td>
-                    <td>Mauris</td>
-                </tr>
-                <tr>
-                    <td>1,010</td>
-                    <td>massa</td>
-                    <td>Vestibulum</td>
-                    <td>lacinia</td>
-                    <td>arcu</td>
-                </tr>
-                <tr>
-                    <td>1,011</td>
-                    <td>eget</td>
-                    <td>nulla</td>
-                    <td>Class</td>
-                    <td>aptent</td>
-                </tr>
-                <tr>
-                    <td>1,012</td>
-                    <td>taciti</td>
-                    <td>sociosqu</td>
-                    <td>ad</td>
-                    <td>litora</td>
-                </tr>
-                <tr>
-                    <td>1,013</td>
-                    <td>torquent</td>
-                    <td>per</td>
-                    <td>conubia</td>
-                    <td>nostra</td>
-                </tr>
-                <tr>
-                    <td>1,014</td>
-                    <td>per</td>
-                    <td>inceptos</td>
-                    <td>himenaeos</td>
-                    <td>Curabitur</td>
-                </tr>
-                <tr>
-                    <td>1,015</td>
-                    <td>sodales</td>
-                    <td>ligula</td>
-                    <td>in</td>
-                    <td>libero</td>
-                </tr>
-            </tbody>
-        </table>
+    <div class="card text-center mt-3 mb-3">
+        <div class="card-header bg-secondary text-white">
+            {{ _('Call-In Number') }}
+        </div>
+        <div class="card-body">
+            <h2 class="card-title">{{ config.pretty_app_inbound_number }}</h2>
+            <p class="card-text">Call this number to listen to or record messages for your Crew.</p>
+    
+        </div>
+    </div>
+
+    <div class="card text-center mt-3 mb-3">
+        <div class="card-header bg-secondary text-white">
+            {{ _('You Crew Account Details') }}
+        </div>
+        <div class="card-body">
+            <h2 class="card-title">{{ crew.account_pin }}</h2>
+            <p class="card-text">This is your Crew's Account PIN. When you call the main {{ config.app_name }} number, enter this PIN to access your Crew's messages.</p>
+            
+        </div>
+    </div>
+
+    <div class="card text-center mt-3 mb-3">
+        <div class="card-header text-white {% if crew.access_code %}bg-success{% else %}bg-warning{% endif %}">
+            {{ _('Account Protection') }}
+        </div>
+        <div class="card-body">
+            <h2 class="card-title">{% if crew.access_code %}{{ _('Protected') }}{% else %}{{ _('Unprotected') }}{% endif %}</h2>
+            {% if crew.access_code %}
+            <p class="card-text">Your Crew's messages are protected, which means all members must enter an additional Access Code in order to listen to or record messages.</p>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#access_code_modal">
+                {{ _('Reveal Code') }}
+            </button>
+            {% else %}
+            <p class="card-text">Your Crew's messages are not protected, which simply means anyone with your Account PIN may listen
+                to and record messages. You may add an Access Code to protect your account with an additional input.</p>
+                {% if current_user.has_role('crew_admin') %}
+                <a href="{{ url_for('home_settings_route') }}" class="btn btn-primary">{{ _('Add Account Protection') }}</a>
+                {% else %}
+                <small>Account protectection can only be added by your Crew Admin</small>
+                {% endif %}
+            {% endif %}
+            
+    
+        </div>
     </div>
 </main>
+<div class="modal fade" id="access_code_modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ _('Access Code') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p>{{ _('Your Access Code is') }}:</p>
+                <h2>{{ crew.access_code }}</h2>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Close') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

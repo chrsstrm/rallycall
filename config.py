@@ -3,6 +3,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config(object):
     ENV = os.environ.get('FLASK_ENV')
+    APP_NAME = os.environ.get('APP_NAME') or "Rally Call"
     APP_BASE_URL = os.environ.get('APP_BASE_URL')
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///' + os.path.join(basedir, 'app.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False

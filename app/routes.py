@@ -8,7 +8,8 @@ from flask_security import Security, SQLAlchemyUserDatastore, UserMixin, RoleMix
 from flask_security.utils import encrypt_password, verify_password, hash_password, login_user, send_mail
 from flask_security.decorators import roles_required, roles_accepted
 import os
-from app.models import Users, Role, Crews, Messages
+from app.models import Users, Role, Crews, Messages, AppSafeConfig
+from app.forms import CrewSettings
 from twilio.twiml.voice_response import VoiceResponse, Say, Gather, Record, Play, Hangup
 from twilio.rest import Client
 
@@ -97,6 +98,14 @@ def inject_crew():
     else:
         return dict(crew=None)
 
+@app.context_processor
+def inject_config():
+    """Make sure to include the global configs in each route 
+    for use in the template. 
+    """
+    config = AppSafeConfig()
+    return dict(config=config)
+
 @app.route('/')
 def index_route():
     '''
@@ -133,6 +142,33 @@ def user_registered_sighandler(sender, user, confirm_token):
 @app.route('/home')
 def home_route():
     return render_template('home.html')
+
+@app.route('/home/messages')
+def home_messages_route():
+    crew = Crews.query.get(current_user.crew_id)
+    messages = crew.messages
+    
+    return render_template('home_messages.html', messages=messages)
+
+@app.route('/home/settings', methods=['GET', 'POST'])
+def home_settings_route():
+    crew = Crews.query.get(current_user.crew_id)
+    form = CrewSettings(obj=crew)
+    
+    if form.validate_on_submit():
+        try:
+            crew.name = form.name.data
+            if form.access_code.data == '':
+                crew.access_code = None
+            else:    
+                crew.access_code = form.access_code.data
+            db.session.commit()
+            flash('Your crew settings have been saved.', category='success')
+            
+        except Exception as e:
+            flash('Your settings were not saved, an error ocurred.', category='error')
+    
+    return render_template('home_settings.html', form=form)
 
 @app.route('/account-lookup', methods=["POST"])
 def account_lookup_route():
@@ -377,6 +413,11 @@ def system_err(e):
 '''
 TODO items
 
-TODO - trigger Twilio callback on call end to hit an endpoint and clear the session vars. 
-TODO - offer text-to-speech or recorded prompt options. 
+TODO - adjust app name to use env var in all places
+TODO - make sure suspended and deleted crews can't log in or use system
+TODO - make sure suspended and deleted users can't log in. 
+TODO - build out messages dashboard
+TODO - build out crew settings dashboard
+TODO - build out crew members dashboard
+TODO - fix dashboard mobile nav
 '''

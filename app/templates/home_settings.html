@@ -1,0 +1,36 @@
+{% extends "layouts/protected_base.html" %}
+{% block content %}
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+    {% include 'includes/flash_messages.html' %}
+    <div
+        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">{{_('Settings')}}</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            
+        </div>
+    </div>
+    <form method="POST" id="settings-form" action="{{ url_for('home_settings_route') }}">
+        {{ form.hidden_tag() }}
+        {{ form.name.label(class_="sr-only mt-1") }}
+        {% if form.name.errors %}
+            {{ form.name(placeholder=_('Name'), class_="form-control is-invalid text-dark mb-3") }}
+            {% for error in form.name.errors %}
+                <div class="alert alert-danger">{{error}}</div>
+            {% endfor %}
+        {% else %}
+            {{ form.name(placeholder=_('Name'), class_="form-control text-dark mb-3") }}
+        {% endif %}
+
+        {{ form.access_code.label(class_="sr-only mt-1") }}
+        {% if form.access_code.errors %}
+            {{ form.access_code(placeholder=_('Access Code - 6 Digits Only'), class_="form-control is-invalid text-dark mb-3") }}
+            {% for error in form.access_code.errors %}
+                <div class="alert alert-danger">{{error}}</div>
+            {% endfor %}
+        {% else %}
+            {{ form.access_code(placeholder=_('Access Code - 6 Digits Only'), class_="form-control text-dark mb-3") }}
+        {% endif %}
+        {{ form.submit(class_="btn btn btn-primary btn-block") }}
+    </form>
+</main>
+{% endblock %}

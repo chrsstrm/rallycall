@@ -4,25 +4,25 @@
             <li class="nav-item">
                 <a class="nav-link active" aria-current="page" href="{{ url_for('home_route') }}">
                     <span data-feather="home"></span>
-                    Dashboard
+                    {{_('Dashboard')}}
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link" href="{{ url_for('home_messages_route') }}">
                     <span data-feather="voicemail"></span>
-                    Messages
+                    {{_('Messages')}}
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="#">
                     <span data-feather="users"></span>
-                    Members
+                    {{_('Members')}}
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link" href="{{ url_for('home_settings_route') }}">
                     <span data-feather="settings"></span>
-                    Settings
+                    {{_('Settings')}}
                 </a>
             </li>
             

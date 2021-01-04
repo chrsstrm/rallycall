@@ -1,0 +1,49 @@
+{% extends "layouts/protected_base.html" %}
+{% block content %}
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+    {% include 'includes/flash_messages.html' %}
+    <div
+        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">{{_('Messages')}}</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            
+        </div>
+    </div>
+   
+    <div class="table-responsive">
+        <table class="table table-striped table-sm">
+            <thead>
+                <tr>
+                    <th>{{ _('Created') }}</th>
+                    <th></th>
+                    <th></th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+                {% if messages %}
+                {% for message in messages %}
+                <tr id="{{ message.id }}" data-id="{{ message.id }}">
+                    <td class="align-middle">{{ message.created }}</td>
+                    <td class="align-middle">
+                        <audio controls src="{{ message.url }}.mp3">
+                        {{_('Your browser does not support message playback.')}}
+                        </audio>
+                    </td>
+                    <td class="align-middle">
+                        <button type="button" class="btn btn-danger">
+                            <span style="color:white;" data-feather="trash-2"></span>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan=3>{{ _('No messages') }}</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</main>
+{% endblock %}
