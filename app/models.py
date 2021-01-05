@@ -102,7 +102,7 @@ class Crews(db.Model):
     created = db.Column(db.DateTime, default=datetime.utcnow)
     status = db.Column(crew_status_enum)
     members = db.relationship('Users', backref='crew', lazy='dynamic')
-    messages = db.relationship('Messages', back_populates="crew", order_by="desc(Messages.created)")
+    messages = db.relationship('Messages', back_populates="crew", order_by="desc(Messages.created)", lazy='dynamic')
 
     def __init__(self, **kwargs):
         app.logger.debug("Init Crew")

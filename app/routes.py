@@ -143,12 +143,35 @@ def user_registered_sighandler(sender, user, confirm_token):
 def home_route():
     return render_template('home.html')
 
-@app.route('/home/messages')
+@app.route('/home/messages', methods=['GET'])
 def home_messages_route():
+    """
+    Display all Messages for the Crew that are not deleted. 
+    """
     crew = Crews.query.get(current_user.crew_id)
-    messages = crew.messages
+    messages = crew.messages.filter(~Messages.status.in_(['deleted'])).all()
     
     return render_template('home_messages.html', messages=messages)
+
+@app.route('/home/messages/<id>', methods=['DELETE'])
+def home_del_message_route(id):
+    """
+    Route just for deleting Messages. 
+    We don't actually do a physical delete though, just set status to 'deleted'
+    This route does not return a view, it redirects to the messages route. 
+    """
+    try:
+        message = Messages.query.get(id)
+        if message:
+            message.status = 'deleted'
+            db.session.commit()
+            flash('Your message was deleted.', category='success')
+        else:
+            flash('This message does not exist.', category='error')
+    except Exception as _:
+        flash('This message could not be deleted.', category='error')
+    
+    return jsonify(success=True), 200, {'ContentType':'application/json'} 
 
 @app.route('/home/settings', methods=['GET', 'POST'])
 def home_settings_route():
@@ -416,8 +439,11 @@ TODO items
 TODO - adjust app name to use env var in all places
 TODO - make sure suspended and deleted crews can't log in or use system
 TODO - make sure suspended and deleted users can't log in. 
-TODO - build out messages dashboard
 TODO - build out crew settings dashboard
 TODO - build out crew members dashboard
 TODO - fix dashboard mobile nav
+TODO - fix messages mobile nav
+TODO - delete account
+TODO - message pagination
+TODO - message date display
 '''
