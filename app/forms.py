@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
+from wtforms import StringField, SubmitField, PasswordField
 from wtforms.validators import DataRequired, ValidationError, Length, Regexp, Optional
 import re
 
@@ -15,3 +15,7 @@ class CrewSettings(FlaskForm):
     name = StringField('Crew Name (optional)', validators=[])
     access_code = StringField('Access Code', validators=[code_check, Optional()])
     submit = SubmitField('Save')
+
+class CrewDelete(FlaskForm):
+    password = PasswordField('Password', validators=[DataRequired()])
+    submit = SubmitField('Delete Account')

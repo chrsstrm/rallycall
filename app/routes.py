@@ -5,11 +5,11 @@ from app import db
 from flask import jsonify, request, render_template, url_for, redirect, flash, session, Response, send_file, send_from_directory
 from flask_migrate import Migrate
 from flask_security import Security, SQLAlchemyUserDatastore, UserMixin, RoleMixin, current_user, user_registered
-from flask_security.utils import encrypt_password, verify_password, hash_password, login_user, send_mail
-from flask_security.decorators import roles_required, roles_accepted
+from flask_security.utils import encrypt_password, verify_password, hash_password, login_user, send_mail, logout_user
+from flask_security.decorators import roles_required, roles_accepted, login_required
 import os
 from app.models import Users, Role, Crews, Messages, AppSafeConfig
-from app.forms import CrewSettings
+from app.forms import CrewSettings, CrewDelete
 from twilio.twiml.voice_response import VoiceResponse, Say, Gather, Record, Play, Hangup
 from twilio.rest import Client
 import arrow
@@ -121,7 +121,7 @@ def inject_config():
 @app.route('/')
 def index_route():
     '''
-    Our public homepage. 
+    The public homepage. 
     '''
     return render_template('root-index.html')
 
@@ -152,10 +152,14 @@ def user_registered_sighandler(sender, user, confirm_token):
     login_user(user)
 
 @app.route('/home')
+@login_required
+@roles_accepted('crew_admin', 'basic_user')
 def home_route():
     return render_template('home.html')
 
 @app.route('/home/messages', methods=['GET'])
+@login_required
+@roles_accepted('crew_admin', 'basic_user')
 def home_messages_route():
     """
     Display all Messages for the Crew that are not deleted. 
@@ -175,6 +179,8 @@ def home_messages_route():
     return render_template('home_messages.html', messages=messages.items, next=next_url, prev=prev_url)
 
 @app.route('/home/messages/<id>', methods=['DELETE'])
+@login_required
+@roles_accepted('crew_admin')
 def home_del_message_route(id):
     """
     Route just for deleting Messages. 
@@ -195,9 +201,12 @@ def home_del_message_route(id):
     return jsonify(success=True), 200, {'ContentType':'application/json'} 
 
 @app.route('/home/settings', methods=['GET', 'POST'])
+@login_required
+@roles_accepted('crew_admin')
 def home_settings_route():
     crew = Crews.query.get(current_user.crew_id)
     form = CrewSettings(obj=crew)
+    del_form = CrewDelete()
     
     if form.validate_on_submit():
         try:
@@ -209,10 +218,69 @@ def home_settings_route():
             db.session.commit()
             flash('Your crew settings have been saved.', category='success')
             
-        except Exception as e:
+        except Exception as _:
             flash('Your settings were not saved, an error ocurred.', category='error')
     
-    return render_template('home_settings.html', form=form)
+    return render_template('home_settings.html', form=form, del_form=del_form)
+
+@app.route('/crews', methods=['POST'])
+@login_required
+@roles_accepted('crew_admin')
+def crew_delete_route():
+    """
+    Crews route that is currently strictly for deleting the entire 
+    account. 
+    Will prompt for the admin's password and then:
+    - deactivate all members
+    - deactivate the admin
+    - set the status of the Crew to deleted
+    """
+    form = CrewDelete()
+    crew = Crews.query.get(current_user.crew_id)
+    
+    if form.validate_on_submit():
+        try:
+            if verify_password(form.password.data, current_user.password):
+                """
+                Request the admin's password before we destroy the account
+                """
+                pass
+            else:
+                flash('Your password was not correct.', category='error')
+                return redirect(url_for('home_settings_route'))
+            
+        except Exception as _:
+            flash('There was an error deleting this account.', category='error')
+            return redirect(url_for('home_settings_route'))
+
+        try:
+            """
+            Deactivate all Crew users and change their status. 
+            active=False will not allow them to log in. 
+            """
+            users = Users.query.filter_by(crew_id=crew.id).all()
+            for user in users:
+                user.active = False
+                user.status = 'deleted'
+            db.session.commit()
+        except Exception as _:
+            flash('Could not remove Crew members, please try again.', category='error')
+            return redirect(url_for('home_settings_route'))
+        
+        try:
+            """
+            Change the Crew status to deleted
+            """
+            crew.status = 'deleted'
+            db.session.commit()
+        except Exception as _:
+            flash('Could not remove Crew, please try again.', category='error')
+            return redirect(url_for('home_settings_route'))
+
+        # finally, log out the user
+        logout_user()
+        
+    return redirect(url_for('index_route'))
 
 @app.route('/account-lookup', methods=["POST"])
 def account_lookup_route():
@@ -251,11 +319,18 @@ def account_lookup_route():
             gather.say(f"Your input was not correct. Please input your account pin and then press the pound key.", voice=app.config['TWILIO_VOICE_SETTING'])
             resp.append(gather)
             return str(resp)
+        elif crew.status in ['suspended', 'deleted']:
+            # crew is deleted or deactivated by an admin, kill call
+            resp.say(f"This account is deactivated. Goodbye.", voice=app.config['TWILIO_VOICE_SETTING'])
+            hangup = Hangup()
+            resp.append(hangup)
+            return str(resp)
         elif crew.access_code is not None:
             # crew is using an access code, send to the check pin route
             session['sessionCrewId'] = crew.id
             return redirect(url_for('check_pin_route'), code=307)
         else:
+            # crew exists and is in good standing, proceed
             session['sessionCrewId'] = crew.id
             return redirect(url_for('main_menu_route'), code=307)
 
@@ -457,12 +532,8 @@ def system_err(e):
 '''
 TODO items
 
-TODO - make sure suspended and deleted crews can't log in or use system
-TODO - make sure suspended and deleted users can't log in. 
-TODO - build out crew settings dashboard
 TODO - build out crew members dashboard
 TODO - fix dashboard mobile nav
 TODO - fix messages mobile nav
-TODO - delete account
 TODO - the JS location.assign after message del is losing the flash success message. 
 '''

@@ -9,7 +9,7 @@
             
         </div>
     </div>
-    <form method="POST" id="settings-form" action="{{ url_for('home_settings_route') }}">
+    <form method="POST" id="settings-form" action="{{ url_for('home_settings_route') }}" class="mb-5 pb-5">
         {{ form.hidden_tag() }}
         {{ form.name.label(class_="sr-only mt-1") }}
         {% if form.name.errors %}
@@ -32,5 +32,45 @@
         {% endif %}
         {{ form.submit(class_="btn btn btn-primary btn-block") }}
     </form>
+    <div class="card text-center mt-5 mb-3">
+        <div class="card-header bg-danger text-white">
+            {{ _('Delete Account') }}
+        </div>
+        <div class="card-body">
+            <p class="card-text">{{ _('Deleting this account is permanent and will disable all members of your Crew. All Messages will be lost.') }}</p>
+            <button type="button" class="btn btn-danger del-account-btn" data-bs-toggle="modal" data-bs-target="#del_account_modal">
+                <span data-feather="alert-circle"></span>
+                {{ _('Delete Account') }}
+            </button>
+        </div>
+    </div>
 </main>
+<div class="modal fade" id="del_account_modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ _('Delete Account?') }}</h5>
+            </div>
+            <div class="modal-body text-center">
+                <p>{{ _('Are you sure you want to delete your account? This is permanent and cannot be undone.') }}</p>
+            </div>
+            <div class="modal-footer" id="del-modal-actions">
+                <form method="POST" id="settings-form" action="{{ url_for('crew_delete_route') }}" class="mb-5 pb-5">
+                    {{ del_form.hidden_tag() }}
+                    {{ del_form.password.label(class_="sr-only mt-1") }}
+                    {% if del_form.password.errors %}
+                    {{ del_form.password(placeholder=_('Password'), class_="form-control is-invalid text-dark mb-3") }}
+                    {% for error in del_form.password.errors %}
+                    <div class="alert alert-danger">{{error}}</div>
+                    {% endfor %}
+                    {% else %}
+                    {{ del_form.password(placeholder=_('Password'), class_="form-control text-dark mb-3") }}
+                    {% endif %}
+                    <button type="button" data-bs-dismiss="modal" class="btn btn-secondary">{{ _('Cancel') }}</button>
+                    {{ del_form.submit(class_="btn btn btn-danger btn-block") }}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
