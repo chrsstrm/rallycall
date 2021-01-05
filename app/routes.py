@@ -12,6 +12,7 @@ from app.models import Users, Role, Crews, Messages, AppSafeConfig
 from app.forms import CrewSettings
 from twilio.twiml.voice_response import VoiceResponse, Say, Gather, Record, Play, Hangup
 from twilio.rest import Client
+import arrow
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 user_datastore = SQLAlchemyUserDatastore(db, Users, Role)
@@ -87,6 +88,17 @@ def bootstrap_app():
     except Exception as _:
         app.logger.debug("Could not update Twilio inbound number properties")
 
+def friendly_date(timestamp):
+    """
+    Define a template filter to display the Message creation date 
+    in a more human-friendly form. 
+    Then make sure to register the new filter. 
+    """
+    c_date = arrow.get(timestamp)
+    return c_date.humanize()
+
+app.add_template_filter(friendly_date)
+
 @app.context_processor
 def inject_crew():
     """Make sure to include the crew object in each route 
@@ -149,9 +161,18 @@ def home_messages_route():
     Display all Messages for the Crew that are not deleted. 
     """
     crew = Crews.query.get(current_user.crew_id)
-    messages = crew.messages.filter(~Messages.status.in_(['deleted'])).all()
+    page = request.args.get("page", 1, type=int)
+    messages = Messages.\
+        query.\
+        filter_by(crew_id=crew.id).\
+        filter(~Messages.status.in_(['deleted'])).\
+        order_by(Messages.created.desc()).\
+        paginate(page, app.config['POSTS_PER_PAGE'], True)
     
-    return render_template('home_messages.html', messages=messages)
+    next_url = url_for('home_messages_route', page=messages.next_num) if messages.has_next else None
+    prev_url = url_for('home_messages_route', page=messages.prev_num) if messages.has_prev else None
+    
+    return render_template('home_messages.html', messages=messages.items, next=next_url, prev=prev_url)
 
 @app.route('/home/messages/<id>', methods=['DELETE'])
 def home_del_message_route(id):
@@ -240,7 +261,7 @@ def account_lookup_route():
 
     # this block will be run during the very first POST to this route, signaling a new incoming call
     gather = Gather(action=app.config['APP_BASE_URL'] + url_for('account_lookup_route'), method='POST', input="dtmf", timeout=3, finishOnKey='#')
-    gather.say("You have reached rally call. Please enter your account pin and then press the pound key.", voice=app.config['TWILIO_VOICE_SETTING'])
+    gather.say(f"You have reached { app.config['APP_NAME'] }. Please enter your account pin and then press the pound key.", voice=app.config['TWILIO_VOICE_SETTING'])
     resp.append(gather)
     return str(resp)
 
@@ -436,7 +457,6 @@ def system_err(e):
 '''
 TODO items
 
-TODO - adjust app name to use env var in all places
 TODO - make sure suspended and deleted crews can't log in or use system
 TODO - make sure suspended and deleted users can't log in. 
 TODO - build out crew settings dashboard
@@ -444,6 +464,5 @@ TODO - build out crew members dashboard
 TODO - fix dashboard mobile nav
 TODO - fix messages mobile nav
 TODO - delete account
-TODO - message pagination
-TODO - message date display
+TODO - the JS location.assign after message del is losing the flash success message. 
 '''

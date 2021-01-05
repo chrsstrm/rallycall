@@ -1,5 +1,11 @@
 {% extends "layouts/protected_base.html" %}
 {% block content %}
+<style>
+    @media only screen and (max-width: 400px) {
+        table tr th:nth-child(1)	{ display:none; visibility:hidden; }
+        table tr td:nth-child(1)			{ display:none; visibility:hidden; }
+    }
+</style>
 <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
     {% include 'includes/flash_messages.html' %}
     <div
@@ -21,10 +27,10 @@
                 </tr>
             </thead>
             <tbody>
-                {% if messages | length %}
+                {% if messages %}
                 {% for message in messages %}
                 <tr id="{{ message.id }}" data-id="{{ message.id }}">
-                    <td class="align-middle">{{ message.created }}</td>
+                    <td class="align-middle"><small class="text-muted">{{ message.created | friendly_date }}</small></td>
                     <td class="align-middle">
                         <audio controls src="{{ message.url }}.mp3">
                         {{_('Your browser does not support message playback.')}}
@@ -44,6 +50,20 @@
                 {% endif %}
             </tbody>
         </table>
+        <div class="container text-center mt-4">
+            <div class="btn-group mx-auto" role="group" aria-label="{{ _('Pagination') }}">
+                {% if prev %}
+                <a href="{{ prev }}" type="button" class="btn btn-secondary">{{ _('< Prev')}}</a>
+                {% else %}
+                <a href="" disabled type="button" class="disabled btn btn-secondary">{{ _('< Prev')}}</a>
+                {% endif %}
+                {% if next %}
+                <a href="{{ next }}" type="button" class="btn btn-secondary">{{ _('Next >')}}</a>
+                {% else %}
+                <a href="" disabled type="button" class="disabled btn btn-secondary">{{ _('Next >')}}</a>
+                {% endif %}
+            </div>
+        </div>
     </div>
 </main>
 <div class="modal fade" id="del_message_modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
