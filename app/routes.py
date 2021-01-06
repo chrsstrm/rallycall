@@ -536,4 +536,5 @@ TODO - build out crew members dashboard
 TODO - fix dashboard mobile nav
 TODO - fix messages mobile nav
 TODO - the JS location.assign after message del is losing the flash success message. 
+TODO - crew invitation system 
 '''

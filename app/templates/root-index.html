@@ -3,88 +3,135 @@
 <main>
     <div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-light">
         <div class="col-md-5 p-lg-5 mx-auto my-5">
-            <h1 class="display-4 fw-normal">Punny headline</h1>
-            <p class="lead fw-normal">And an even wittier subheading to boot. Jumpstart your marketing efforts with
-                this example based on Apple’s marketing pages.</p>
-            <a class="btn btn-outline-secondary" href="#">Coming soon</a>
+            <h1 class="display-4 fw-normal">Emergency Group Communication Portal</h1>
+            <p class="lead fw-normal">If you didn't have use of your cellular phone in an emergency, how would you communicate with family and loved ones?</p>
+            <p class="lead fw-normal">Stay connected with a group mailbox that is accessible from any phone.</p>
+            <a class="btn btn-outline-secondary" href="#features">Learn More</a>
         </div>
         <div class="product-device shadow-sm d-none d-md-block"></div>
         <div class="product-device product-device-2 shadow-sm d-none d-md-block"></div>
     </div>
+    <div class="container marketing" id="features">
+        <div class="row mb-5">
+            <div class="col-lg-4 text-center">
+                <span class="w-25 h-25" data-feather="phone-call"></span>
+        
+                <h2>Any Phone Works</h2>
+                <p>You and your crew members can call in from any phone - cellular, land lines, VOIP, feature phones - any touch-tone capable device can connect you to your account. </p>
+                <p><a class="btn btn-secondary" href="#" role="button">View details &raquo;</a></p>
+            </div><!-- /.col-lg-4 -->
+            <div class="col-lg-4 text-center">
+                <span class="w-25 h-25" data-feather="activity"></span>
+        
+                <h2>Listen or Record</h2>
+                <p>{{ config.app_name }} is like a group mailbox - you can record messages for others to hear and listen to messages left by other members of your crew.</p>
+                <p><a class="btn btn-secondary" href="#" role="button">View details &raquo;</a></p>
+            </div><!-- /.col-lg-4 -->
+            <div class="col-lg-4 text-center">
+                <span class="w-25 h-25" data-feather="share-2"></span>
+        
+                <h2>Easily Shared</h2>
+                <p>Simply share the dial-in number and Account PIN with anyone you want to participate in your crew. Once a crew leader has created an account on {{ config.app_name }}, no other members are required to register.</p>
+                <p><a class="btn btn-secondary" href="#" role="button">View details &raquo;</a></p>
+            </div><!-- /.col-lg-4 -->
+        </div><!-- /.row -->
 
-    <div class="d-md-flex flex-md-equal w-100 my-md-3 ps-md-3">
-        <div class="bg-dark me-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center text-white overflow-hidden">
-            <div class="my-3 py-3">
-                <h2 class="display-5">Another headline</h2>
-                <p class="lead">And an even wittier subheading.</p>
+        <hr class="featurette-divider mb-3">
+        
+        <div class="row featurette">
+            <div class="col-md-7">
+                <h2 class="featurette-heading">Easy communication with family and friends in an emergency is critical <span class="text-muted">but you have to plan ahead on how you will stay in touch.</span>
+                </h2>
+                <p class="lead">It could be as simple as letting others know you're OK, or you might need a channel to organize a meeting location. The ability to communicate in dire times brings both peace of mind and security in knowing everyone is working towards a common goal. </p>
+                <p class="lead">The best-case scenario is you register for an account and never have to use it, but having a {{ config.app_name }} account when it's needed could save lives.</p>
             </div>
-            <div class="bg-light shadow-sm mx-auto"
-                style="width: 80%; height: 300px; border-radius: 21px 21px 0 0;"></div>
+            <div class="col-md-5">
+                <figure>
+                    <img src="{{ url_for('static', filename='daria-nepriakhina-_XR5rkprHQU-unsplash.jpg') }}" width="500" height="auto" />
+                    <figcaption><span class="text-muted"><small>Photo by <a
+                            href="https://unsplash.com/@epicantus?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditCopyText">Daria
+                            Nepriakhina</a> on <a
+                            href="https://unsplash.com/s/photos/woman-on-phone?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditCopyText">Unsplash</a></small></span></figcaption>
+                </figure>
+            </div>
         </div>
-        <div class="bg-light me-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden">
-            <div class="my-3 p-3">
-                <h2 class="display-5">Another headline</h2>
-                <p class="lead">And an even wittier subheading.</p>
-            </div>
-            <div class="bg-dark shadow-sm mx-auto" style="width: 80%; height: 300px; border-radius: 21px 21px 0 0;">
-            </div>
-        </div>
-    </div>
+        
+        <hr class="featurette-divider">
 
-    <div class="d-md-flex flex-md-equal w-100 my-md-3 ps-md-3">
-        <div class="bg-light me-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden">
-            <div class="my-3 p-3">
-                <h2 class="display-5">Another headline</h2>
-                <p class="lead">And an even wittier subheading.</p>
-            </div>
-            <div class="bg-dark shadow-sm mx-auto" style="width: 80%; height: 300px; border-radius: 21px 21px 0 0;">
-            </div>
-        </div>
-        <div class="bg-primary me-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center text-white overflow-hidden">
-            <div class="my-3 py-3">
-                <h2 class="display-5">Another headline</h2>
-                <p class="lead">And an even wittier subheading.</p>
-            </div>
-            <div class="bg-light shadow-sm mx-auto"
-                style="width: 80%; height: 300px; border-radius: 21px 21px 0 0;"></div>
-        </div>
-    </div>
+        <div class="container mb-5 mt-5" id="how-it-works">
+            <h2 class="featurette-heading">How It Works</h2>
+            <div class="card-group">
+                
+                
+                <div class="card" style="width: 18rem;">
+                    <div class="card-body">
+                        <h5 class="card-title">1. Create an account</h5>
+                        
+                        <p class="card-text">Create your Crew's account by registering. You will receive the {{ config.app_name }} dial-in number and your Crew's unique Account PIN.</p>
+                        
+                    </div>
+                </div>
 
-    <div class="d-md-flex flex-md-equal w-100 my-md-3 ps-md-3">
-        <div class="bg-light me-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden">
-            <div class="my-3 p-3">
-                <h2 class="display-5">Another headline</h2>
-                <p class="lead">And an even wittier subheading.</p>
-            </div>
-            <div class="bg-white shadow-sm mx-auto"
-                style="width: 80%; height: 300px; border-radius: 21px 21px 0 0;"></div>
-        </div>
-        <div class="bg-light me-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden">
-            <div class="my-3 py-3">
-                <h2 class="display-5">Another headline</h2>
-                <p class="lead">And an even wittier subheading.</p>
-            </div>
-            <div class="bg-white shadow-sm mx-auto"
-                style="width: 80%; height: 300px; border-radius: 21px 21px 0 0;"></div>
-        </div>
-    </div>
+                <div class="card" style="width: 18rem;">
+                    <div class="card-body">
+                        <h5 class="card-title">2. Build your Crew</h5>
+                
+                        <p class="card-text">Share the dial-in number and Account PIN with anyone you want in your Crew. Each member will be able to call in from any phone and both listen to and record Messages for the group to hear.</p>
+                
+                    </div>
+                </div>
 
-    <div class="d-md-flex flex-md-equal w-100 my-md-3 ps-md-3">
-        <div class="bg-light me-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden">
-            <div class="my-3 p-3">
-                <h2 class="display-5">Another headline</h2>
-                <p class="lead">And an even wittier subheading.</p>
+                <div class="card" style="width: 18rem;">
+                    <div class="card-body">
+                        <h5 class="card-title">3. Use {{ config.app_name }}</h5>
+                
+                        <p class="card-text">Whenever you need to keep in touch with your Crew members and traditional lines of communication are unavailable, use {{ config.app_name }}. Record a Message for other's to hear and listen to Messages left by other members.</p>
+                
+                    </div>
+                </div>
+                
             </div>
-            <div class="bg-white shadow-sm mx-auto"
-                style="width: 80%; height: 300px; border-radius: 21px 21px 0 0;"></div>
         </div>
-        <div class="bg-light me-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden">
-            <div class="my-3 py-3">
-                <h2 class="display-5">Another headline</h2>
-                <p class="lead">And an even wittier subheading.</p>
+        <div class="row featurette mb-5" id="faqs">
+            <div class="col-md-12">
+                <h2 class="featurette-heading">Frequent Questions</h2>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <p><strong>What is a "Crew?"</strong></p>
+                        <p>A Crew is what we call your group of people staying connected. They can be family, friends, co-workers - anyone you want to include in your messaging group.</p>
+                    </li>
+                    <li class="list-group-item">
+                        <p><strong>Can I choose my Crew's Account PIN?</strong></p>
+                        <p>The Account PIN is a unique idenitfier that your Crew members must enter to gain access to the account. No, you cannot choose the Account PIN, it is automatically assigned when your account is created.</p>
+                    </li>
+                    <li class="list-group-item">
+                        <p><strong>Do all my Crew members need to register for an account?</strong></p>
+                        <p>No, a Crew only requires one person to register - they will be the account admin. Crew members can access the account message center via any phone by just knowing the dial-in number and Account PIN.</p>
+                    </li>
+                    <li class="list-group-item">
+                        <p><strong>Are Messages encrypted?</strong></p>
+                        <p>No, Messages are not encrypted. {{ config.app_name }} is not intended to be a secure communication service, it only serves as an easily-accessible hub for a small group of people to communicate with voice memos. While your Messages are not publicly-available, you should not treat this as a secure platform.</p>
+                    </li>
+                    <li class="list-group-item">
+                        <p><strong>Is there any way to "protect" an account?</strong></p>
+                        <p>Yes. Your Crew admin can add an Access Code to the account. This is an additional layer of protection that must be input before a Crew member can access the account. The Access Code can be chosen by the admin.</p>
+                    </li>
+                </ul>
             </div>
-            <div class="bg-white shadow-sm mx-auto"
-                style="width: 80%; height: 300px; border-radius: 21px 21px 0 0;"></div>
+        </div>
+        <div class="row">
+            <div class="container">
+                <div class="card text-center">
+                    <div class="card-header">
+                        Register Today!
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Be prepared and register for {{ config.app_name }}</h5>
+                        <p class="card-text">You never know when disaster will strike, that's why it's smart to be prepared. Make a plan, make sure your Crew knows the plan, and use {{ config.app_name }} to keep in touch when tradional communications are unavailable.</p>
+                        <a href="{{ url_for_security('register') }}" class="btn btn-primary">Register</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </main>
