@@ -1,0 +1,141 @@
+{% extends "layouts/protected_base.html" %}
+{% block content %}
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+    {% include 'includes/flash_messages.html' %}
+    <div
+        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">{{ _('Crew') }}</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            
+        </div>
+    </div>
+
+    <div class="card text-center mt-3 mb-3">
+        {% if crew.status == 'created' %}
+        <div class="card-header bg-success text-white">
+            {{ _('Created') }}
+        </div>
+        {% endif %}
+        {% if crew.status == 'active' %}
+        <div class="card-header bg-primary text-white">
+            {{ _('Active') }}
+        </div>
+        {% endif %}
+        {% if crew.status == 'inactive' %}
+        <div class="card-header bg-light text-dark">
+            {{ _('Inactive') }}
+        </div>
+        {% endif %}
+        {% if crew.status == 'suspended' %}
+        <div class="card-header bg-warning text-dark">
+            {{ _('Suspended') }}
+        </div>
+        {% endif %}
+        {% if crew.status == 'deleted' %}
+        <div class="card-header bg-danger text-white">
+            {{ _('Deleted') }}
+        </div>
+        {% endif %}
+        
+        <div class="card-body">
+            <h2 class="card-title">{{ crew.account_pin }}{% if crew.name %} - {{ crew.name }}{% endif %}</h2>
+            <h6 class="card-subtitle mb-2 text-muted mt-4"><span data-feather="calendar"></span> {{ crew.created | utc_date }}</h6>
+            <h5 class="mt-4">Messages: <span class="badge bg-primary">{{ crew.messages.all() | length }}</span></h5>
+            <p class="card-text text-center">
+                {% for admin in admins %}
+                <div class="card mx-auto my-5" style="max-width: 540px;">
+                    <div class="row g-0">
+                        <div class="col-md-4 align-middle">
+                            <span class="align-middle w-100" style="width: 100px; height: 100px" data-feather="user"></span>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <h5 class="card-title">{{admin.email}}</h5>
+                                
+                                {% if admin.name %}
+                                <h6 class="card-subtitle mb-2 text-muted">{{ admin.name }}</h6>
+                                {% endif %}
+                                <p class="card-text"></p>
+                                <p class="card-text"><small class="text-muted"></small></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% if crew.status == 'suspended' %}
+                <button type="button" data-id="{{ crew.id }}" class="btn btn-success" data-bs-toggle="tooltip" data-bs-placement="top"
+                    title="Restore Account">
+                    <span data-feather="unlock" data-id="{{ crew.id }}"></span>
+                    {{ _('Restore') }}
+                </button>
+                {% endif %}
+                {% if crew.status == 'deleted' %}
+                <button type="button" data-id="{{ crew.id }}" class="btn btn-secondary" disabled>
+                    <span data-feather="alert-triangle" data-id="{{ crew.id }}"></span>
+                    {{ _('Suspend') }}
+                </button>
+                {% endif %}
+                {% if crew.status in ['created', 'active', 'inactive'] %}
+                <button type="button" data-id="{{ crew.id }}" class="btn btn-warning text-dark del-msg-btn" data-bs-toggle="tooltip"
+                    data-bs-placement="top" title="Suspend Account">
+                    <span data-feather="alert-triangle" data-id="{{ crew.id }}"></span>
+                    {{ _('Suspend') }}
+                </button>
+                {% endif %}
+                &nbsp;
+                {% if crew.status in ['created', 'active', 'inactive', 'suspended'] %}
+                <button type="button" data-id="{{ crew.id }}" class="btn btn-danger del-msg-btn ml-4" data-bs-toggle="tooltip"
+                    data-bs-placement="top" title="Delete Account">
+                    <span data-feather="trash-2" data-id="{{ crew.id }}"></span>
+                    {{ _('Delete') }}
+                </button>
+                {% endif %}
+                {% if crew.status == 'deleted' %}
+                <button type="button" data-id="{{ crew.id }}" class="btn btn-success" data-bs-toggle="tooltip" data-bs-placement="top"
+                    title="Restore Account">
+                    <span data-feather="unlock" data-id="{{ crew.id }}"></span>
+                    {{ _('Restore') }}
+                </button>
+                {% endif %}
+            </p>
+            
+        </div>
+    </div>
+
+    <div class="card text-center mt-3 mb-3">
+        <div class="card-header text-white {% if crew.access_code %}bg-success{% else %}bg-warning{% endif %}">
+            {{ _('Account Protection') }}
+        </div>
+        <div class="card-body">
+            <h2 class="card-title">{% if crew.access_code %}{{ _('Protected') }}{% else %}{{ _('Unprotected') }}{% endif %}</h2>
+            {% if crew.access_code %}
+            <p class="card-text"></p>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#access_code_modal">
+                {{ _('Reveal Code') }}
+            </button>
+            {% else %}
+            <p class="card-text"></p>
+            {% endif %}
+            
+    
+        </div>
+    </div>
+</main>
+<div class="modal fade" id="access_code_modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ _('Access Code') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p>{{ _('Your Access Code is') }}:</p>
+                <h2>{{ crew.access_code }}</h2>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Close') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

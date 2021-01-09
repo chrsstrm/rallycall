@@ -1,0 +1,173 @@
+{% extends "layouts/protected_base.html" %}
+{% block content %}
+<style>
+    @media only screen and (max-width: 400px) {
+        table tr th:nth-child(1)	{ display:none; visibility:hidden; }
+        table tr td:nth-child(1)			{ display:none; visibility:hidden; }
+    }
+</style>
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+    {% include 'includes/flash_messages.html' %}
+    <div
+        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">{{_('Crews')}}</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            
+        </div>
+    </div>
+   
+    <div class="table-responsive">
+        <table class="table table-striped table-sm">
+            <thead>
+                <tr>
+                    <th>{{ _('Created') }}</th>
+                    <th>{{ _('Account #')}}</th>
+                    <th>{{ _('Name') }}</th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if crews %}
+                {% for crew in crews %}
+                <tr id="{{ crew.id }}" class="crew-row" data-id="{{ crew.id }}">
+                    <td class="align-middle"><small class="text-muted">{{ crew.created | friendly_date }}</small></td>
+                    <td class="align-middle">
+                        {{ crew.account_pin }}
+                    </td>
+                    <td class="align-middle">
+                        {% if crew.name %}{{ crew.name }}{% else %}&nbsp;{% endif %}
+                    </td>
+                    <td class="align-middle">
+                        <span class="badge bg-primary">{{ crew.messages.all() | length }}</span>
+                    </td>
+                    <td class="align-middle" data-id="{{ crew.id }}">
+                        {% if crew.status == 'created' %}
+                        <span class="badge bg-primary">{{ crew.status | title }}</span>
+                        {% endif %}
+                        {% if crew.status == 'active' %}
+                        <span class="badge bg-success">{{ crew.status | title }}</span>
+                        {% endif %}
+                        {% if crew.status == 'inactive' %}
+                        <span class="badge bg-light text-dark">{{ crew.status | title }}</span>
+                        {% endif %}
+                        {% if crew.status == 'suspended' %}
+                        <span class="badge bg-warning text-dark">{{ crew.status | title }}</span>
+                        {% endif %}
+                        {% if crew.status == 'deleted' %}
+                        <span class="badge bg-danger">{{ crew.status | title }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="align-middle">
+                        {% if crew.status == 'suspended' %}
+                        <button type="button" data-id="{{ crew.id }}" class="btn btn-success" data-bs-toggle="tooltip" data-bs-placement="top" title="Restore Account">
+                            <span data-feather="unlock" data-id="{{ crew.id }}"></span>
+                        </button>
+                        {% endif %}
+                        {% if crew.status == 'deleted' %}
+                        <button type="button" data-id="{{ crew.id }}" class="btn btn-secondary" disabled>
+                            <span data-feather="alert-triangle" data-id="{{ crew.id }}"></span>
+                        </button>
+                        {% endif %}
+                        {% if crew.status in ['created', 'active', 'inactive'] %}
+                        <button type="button" data-id="{{ crew.id }}" class="btn btn-warning text-dark del-msg-btn" data-bs-toggle="tooltip" data-bs-placement="top" title="Suspend Account">
+                            <span data-feather="alert-triangle" data-id="{{ crew.id }}"></span>
+                        </button>
+                        {% endif %}
+                        &nbsp;
+                        {% if crew.status in ['created', 'active', 'inactive', 'suspended'] %}
+                        <button type="button" data-id="{{ crew.id }}" class="btn btn-danger del-msg-btn ml-4" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete Account">
+                            <span data-feather="trash-2" data-id="{{ crew.id }}"></span>
+                        </button>
+                        {% endif %}
+                        {% if crew.status == 'deleted' %}
+                        <button type="button" data-id="{{ crew.id }}" class="btn btn-success" data-bs-toggle="tooltip" data-bs-placement="top" title="Restore Account">
+                            <span data-feather="unlock" data-id="{{ crew.id }}"></span>
+                        </button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan=3>{{ _('No crews') }}</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+        <div class="container text-center mt-4">
+            <div class="btn-group mx-auto" role="group" aria-label="{{ _('Pagination') }}">
+                {% if prev %}
+                <a href="{{ prev }}" type="button" class="btn btn-secondary">{{ _('< Prev')}}</a>
+                {% else %}
+                <a href="" disabled type="button" class="disabled btn btn-secondary">{{ _('< Prev')}}</a>
+                {% endif %}
+                {% if next %}
+                <a href="{{ next }}" type="button" class="btn btn-secondary">{{ _('Next >')}}</a>
+                {% else %}
+                <a href="" disabled type="button" class="disabled btn btn-secondary">{{ _('Next >')}}</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</main>
+<div class="modal fade" id="del_message_modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ _('Delete Message?') }}</h5>
+            </div>
+            <div class="modal-body text-center">
+                <p>{{ _('Are you sure you want to delete this message?') }}:</p>
+            </div>
+            <div class="modal-footer" id="del-modal-actions">
+                <button type="button" data-bs-dismiss="modal" class="btn btn-secondary">{{ _('Cancel') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var options = {
+        backdrop:'static'
+    }
+    var delMsgModal = new bootstrap.Modal(document.getElementById('del_message_modal'), options)
+    document.querySelectorAll('.del-msg-btn').forEach(item => {
+        item.addEventListener('click', event => {
+            var button = document.createElement("button");
+            button.innerHTML = "{{ _('Delete') }}";
+            button.id = 'del-msg-btn';
+            button.classList.add('btn', 'btn-danger');
+            
+            button.dataset.id = event.target.dataset.id
+            var buttonlocation = document.getElementById('del-modal-actions');
+            buttonlocation.appendChild(button);
+            delMsgModal.show();
+        })
+    })
+    var msgModal = document.getElementById('del_message_modal');
+    msgModal.addEventListener('click', function (e) {
+        if (e.target && e.target.id == 'del-msg-btn') {
+            
+            var url = "{{url_for('home_del_message_route', id='')}}";
+            url = url + e.target.dataset.id;
+            
+            fetch(url, {
+                method: 'DELETE'
+            })
+            .then(location.assign("{{ url_for('home_messages_route')}}"))
+        }
+    });
+    msgModal.addEventListener('hidden.bs.modal', function (event) {
+        var button = document.getElementById('del-msg-btn');
+        button.remove();
+    });
+    document.querySelectorAll('.crew-row').forEach(item => {
+        item.addEventListener('click', event => {
+            var url = "{{url_for('home_admin_crew_route', id='')}}";
+            url = url + item.id;
+            location.assign(url);
+        })
+    })
+</script>
+{% endblock %}

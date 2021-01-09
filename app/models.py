@@ -51,6 +51,7 @@ class Users(db.Model, UserMixin):
     status = db.Column(user_status_enum)
     password = db.Column(db.String(255))
     active = db.Column(db.Boolean())
+    crew_admin = db.Column(db.Boolean())
     confirmed = db.Column(db.DateTime())
     access_code = db.Column(db.String)
     roles = db.relationship('Role', secondary=roles_users, backref=db.backref('user', lazy='dynamic'))

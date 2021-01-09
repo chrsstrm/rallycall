@@ -1,5 +1,27 @@
 <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
     <div class="position-sticky pt-3">
+        {% if current_user.has_role('admin') %}
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{{ url_for('home_route') }}">
+                    <span data-feather="home"></span>
+                    {{_('Dashboard')}}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('home_admin_crews_route') }}">
+                    <span data-feather="users"></span>
+                    {{_('Crews')}}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('home_settings_route') }}">
+                    <span data-feather="settings"></span>
+                    {{_('Settings')}}
+                </a>
+            </li>
+        </ul>
+        {% else %}
         <ul class="nav flex-column">
             <li class="nav-item">
                 <a class="nav-link active" aria-current="page" href="{{ url_for('home_route') }}">
@@ -25,8 +47,7 @@
                     {{_('Settings')}}
                 </a>
             </li>
-            
-           
         </ul>
+        {% endif %}
     </div>
 </nav>

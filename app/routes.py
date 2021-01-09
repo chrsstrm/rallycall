@@ -97,7 +97,15 @@ def friendly_date(timestamp):
     c_date = arrow.get(timestamp)
     return c_date.humanize()
 
+def utc_date(timestamp):
+    """
+    Define a template filter to display UTC dates 
+    """
+    c_date = arrow.get(timestamp)
+    return c_date.format(arrow.FORMAT_COOKIE)
+
 app.add_template_filter(friendly_date)
+app.add_template_filter(utc_date)
 
 @app.context_processor
 def inject_crew():
@@ -147,13 +155,14 @@ def user_registered_sighandler(sender, user, confirm_token):
     
     crew = Crews()
     user.crew_id = crew.id
+    user.crew_admin = True
     db.session.add(crew)
     db.session.commit()
     login_user(user)
 
 @app.route('/home')
 @login_required
-@roles_accepted('crew_admin', 'basic_user')
+@roles_accepted('crew_admin', 'basic_user', 'admin')
 def home_route():
     return render_template('home.html')
 
@@ -222,6 +231,25 @@ def home_settings_route():
             flash('Your settings were not saved, an error ocurred.', category='error')
     
     return render_template('home_settings.html', form=form, del_form=del_form)
+
+@app.route('/home/crews', methods=['GET','POST'])
+@login_required
+@roles_accepted('admin')
+def home_admin_crews_route():
+    page = request.args.get("page", 1, type=int)
+    crews = Crews.query.paginate(page, app.config['POSTS_PER_PAGE'], True)
+    next_url = url_for('home_admin_crews_route', page=crews.next_num) if crews.has_next else None
+    prev_url = url_for('home_admin_crews_route', page=crews.prev_num) if crews.has_prev else None
+    return render_template('home_crews.html', crews=crews.items)
+
+@app.route('/home/crews/<id>', methods=['GET','POST'])
+@login_required
+@roles_accepted('admin')
+def home_admin_crew_route(id):
+    crew = Crews.query.get(id)
+    app.logger.debug(crew.members.all())
+    admins = crew.members.filter_by(crew_admin = True).all()
+    return render_template('home_crew.html', crew=crew, admins=admins)
 
 @app.route('/crews', methods=['POST'])
 @login_required
