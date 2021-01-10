@@ -41,4 +41,45 @@ This application is built on:
 **A Twilio account is required. You may register and test this system without providing a payment method but buying an inbound number, inbound minutes, and recording minutes are paid features outside of your inital trial period.**    
 
 Local development of this application requires an HTTPS URL which is reachable by Twilio - for this we recommend [ngrok](https:ngrok.com).    
-When developing locally be sure to change the environment var `APP_BASE_URL` to your tunnel URL. 
+When developing locally be sure to change the environment var `APP_BASE_URL` to your tunnel URL.    
+
+ENV Vars    
+====    
+
+This project requires several env vars, including:    
+
+```
+FLASK_APP=rallycall.py
+FLASK_ENV=
+DATABASE_URL=
+SECURITY_PASSWORD_SALT = 
+BOOTSTRAP_ADMIN_PASS = 
+BOOTSTRAP_ADMIN_EMAIL = 
+APP_BASE_URL = 
+APP_NAME = "Rally Call"
+CREW_ACCOUNT_PIN_LENGTH = 6
+TWILIO_VOICE_SETTING = 'Polly.Matthew'
+TWILIO_RECORDING_MAXLENGTH = 300
+TWILIO_INBOUND_NUMBER = 
+TWILIO_ACCOUNT_SID = 
+TWILIO_AUTH_TOKEN = 
+```    
+
+`FLASK_ENV` can be 'development' or 'production'    
+
+`DATABASE_URL` should be the str for your PostgreSQL connection    
+
+`SECURITY_PASSWORD_SALT` choose any sufficiently complex string to seed the SALT    
+
+`BOOTSTRAP_ADMIN_PASS` the inital admin user password string    
+
+`BOOTSTRAP_ADMIN_EMAIL` admin user email for login    
+
+`APP_BASE_URL` the FQD domain URL for the app, no trailing slash    
+
+`TWILIO_INBOUND_NUMBER` the Twilio inbound number in +12223334455 format (E.164)    
+
+`TWILIO_ACCOUNT_SID` the Twilio account Identifier    
+
+`FTWILIO_AUTH_TOKEN` Twilio API auth token    
+
