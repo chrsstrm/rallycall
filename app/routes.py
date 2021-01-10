@@ -104,8 +104,13 @@ def utc_date(timestamp):
     c_date = arrow.get(timestamp)
     return c_date.format(arrow.FORMAT_COOKIE)
 
+def currency_format(value):
+    value = float(value)
+    return "${:,.2f}".format(value)
+
 app.add_template_filter(friendly_date)
 app.add_template_filter(utc_date)
+app.add_template_filter(currency_format)
 
 @app.context_processor
 def inject_crew():
@@ -164,7 +169,28 @@ def user_registered_sighandler(sender, user, confirm_token):
 @login_required
 @roles_accepted('crew_admin', 'basic_user', 'admin')
 def home_route():
-    return render_template('home.html')
+    if current_user.has_role('admin'):
+        message_count = Messages.query.count()
+        crew_count = Crews.query.count()
+        client = client = Client(app.config['TWILIO_ACCOUNT_SID'], app.config['TWILIO_AUTH_TOKEN'])
+        inbound_calls = client.usage.records.list(category="calls-inbound")[0]
+        recordings = client.usage.records.list(category="calls-recordings")[0]
+        totalprice = client.usage.records.list(category="totalprice")[0]
+
+    else: 
+        message_count = None
+        crew_count = None
+        records = None
+        inbound_calls = None
+        recordings = None
+        totalprice = None
+    return render_template('home.html', message_count=message_count, crew_count=crew_count, recordings=recordings, inbound_calls=inbound_calls, totalprice=totalprice)
+
+@app.route('/home/members', methods=['GET'])
+@login_required
+@roles_accepted('crew_admin')
+def home_members_route():
+    return render_template('home_members.html')
 
 @app.route('/home/messages', methods=['GET'])
 @login_required
@@ -211,18 +237,21 @@ def home_del_message_route(id):
 
 @app.route('/home/settings', methods=['GET', 'POST'])
 @login_required
-@roles_accepted('crew_admin')
+@roles_accepted('crew_admin', 'admin')
 def home_settings_route():
     """
     Option for the Crew Admin to add a Crew Name and 
     'protect' the account by adding an Access Code.
     Can also delete the Crew from this view. 
     """
-    crew = Crews.query.get(current_user.crew_id)
+    if current_user.has_role('crew_admin'):
+        crew = Crews.query.get(current_user.crew_id)
+    else:
+        crew = None
     form = CrewSettings(obj=crew)
     del_form = CrewDelete()
     
-    if form.validate_on_submit():
+    if current_user.has_role('crew_admin') and form.validate_on_submit():
         try:
             crew.name = form.name.data
             if form.access_code.data == '':

@@ -22,6 +22,76 @@
     
         </div>
     </div>
+    {% if current_user.has_role('admin') %}
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="card text-center mt-3 mb-3">
+                <div class="card-header bg-secondary text-white">
+                    {{ _('Crews') }}
+                </div>
+                <div class="card-body">
+                    <h2 class="card-title">{{ crew_count }}</h2>
+                    <p class="card-text">
+                        <a href="{{ url_for('home_admin_crews_route') }}" class="btn btn-link">View Crews</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="card text-center mt-3 mb-3">
+                <div class="card-header bg-secondary text-white">
+                    {{ _('Messages') }}
+                </div>
+                <div class="card-body">
+                    <h2 class="card-title">{{ message_count }}</h2>
+                    <p class="card-text">
+                        <span>All-time Messages created</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="card text-center mt-3 mb-3">
+                <div class="card-header bg-secondary text-white">
+                    {{ _('Twilio Calls') }}
+                </div>
+                <div class="card-body">
+                    <h2 class="card-title">{{ inbound_calls.count }}</h2>
+                    <p class="card-text">
+                        <span>The number of calls to the service</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="card text-center mt-3 mb-3">
+                <div class="card-header bg-secondary text-white">
+                    {{ _('Twilio Recordings') }}
+                </div>
+                <div class="card-body">
+                    <h2 class="card-title">{{ recordings.count }}</h2>
+                    <p class="card-text">
+                        <span>Number of recordings created in Twilio</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card text-center mt-3 mb-3">
+        <div class="card-header bg-secondary text-white">
+            {{ _('Twilio System Cost') }}
+        </div>
+        <div class="card-body">
+            <h2 class="card-title">{{ totalprice.price | currency_format }}</h2>
+            
+            <p class="card-text">All-time system Twilio cost</p>
+            
+    
+        </div>
+    </div>
+    {% endif %}
     {% if current_user.has_role('crew_admin') %}
     <div class="card text-center mt-3 mb-3">
         <div class="card-header bg-secondary text-white">

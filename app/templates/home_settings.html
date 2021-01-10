@@ -9,6 +9,7 @@
             
         </div>
     </div>
+    {% if current_user.has_role('crew_admin') %}
     <form method="POST" id="settings-form" action="{{ url_for('home_settings_route') }}" class="mb-5 pb-5">
         {{ form.hidden_tag() }}
         {{ form.name.label(class_="sr-only mt-1") }}
@@ -44,6 +45,10 @@
             </button>
         </div>
     </div>
+    {% else %}
+    <span>No settings available</span>
+    {% endif %}
+
 </main>
 <div class="modal fade" id="del_account_modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
