@@ -16,11 +16,13 @@
         </div>
         <div class="card-body">
             <h2 class="card-title">{{ config.pretty_app_inbound_number }}</h2>
+            {% if current_user.has_role('crew_admin') %}
             <p class="card-text">Call this number to listen to or record messages for your Crew.</p>
+            {% endif %}
     
         </div>
     </div>
-
+    {% if current_user.has_role('crew_admin') %}
     <div class="card text-center mt-3 mb-3">
         <div class="card-header bg-secondary text-white">
             {{ _('Your Crew Account Details') }}
@@ -31,6 +33,7 @@
             
         </div>
     </div>
+    
 
     <div class="card text-center mt-3 mb-3">
         <div class="card-header text-white {% if crew.access_code %}bg-success{% else %}bg-warning{% endif %}">
@@ -56,6 +59,7 @@
     
         </div>
     </div>
+    {% endif %}
 </main>
 <div class="modal fade" id="access_code_modal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">

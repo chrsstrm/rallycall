@@ -569,6 +569,10 @@ def record_route():
         url = request.values['RecordingUrl']
         message = Messages(crew_id=session['sessionCrewId'], url=url)
         db.session.add(message)
+        # if someone is recording messages, we can assume this is an active crew
+        crew = Crews.query.get(session['sessionCrewId'])
+        crew.status = 'active'
+        db.session.add(crew)
         db.session.commit()
         return redirect(url_for('main_menu_route'), code=307)
     
