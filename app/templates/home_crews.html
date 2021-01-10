@@ -44,10 +44,10 @@
                     </td>
                     <td class="align-middle" data-id="{{ crew.id }}">
                         {% if crew.status == 'created' %}
-                        <span class="badge bg-primary">{{ crew.status | title }}</span>
+                        <span class="badge bg-success">{{ crew.status | title }}</span>
                         {% endif %}
                         {% if crew.status == 'active' %}
-                        <span class="badge bg-success">{{ crew.status | title }}</span>
+                        <span class="badge bg-primary">{{ crew.status | title }}</span>
                         {% endif %}
                         {% if crew.status == 'inactive' %}
                         <span class="badge bg-light text-dark">{{ crew.status | title }}</span>

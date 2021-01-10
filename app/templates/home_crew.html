@@ -37,11 +37,11 @@
         </div>
         {% endif %}
         
-        <div class="card-body">
+        <div class="card-body" id="crew-card-body">
             <h2 class="card-title">{{ crew.account_pin }}{% if crew.name %} - {{ crew.name }}{% endif %}</h2>
             <h6 class="card-subtitle mb-2 text-muted mt-4"><span data-feather="calendar"></span> {{ crew.created | utc_date }}</h6>
             <h5 class="mt-4">Messages: <span class="badge bg-primary">{{ crew.messages.all() | length }}</span></h5>
-            <p class="card-text text-center">
+            <p class="card-text text-center" >
                 {% for admin in admins %}
                 <div class="card mx-auto my-5" style="max-width: 540px;">
                     <div class="row g-0">
@@ -63,7 +63,7 @@
                 </div>
                 {% endfor %}
                 {% if crew.status == 'suspended' %}
-                <button type="button" data-id="{{ crew.id }}" class="btn btn-success" data-bs-toggle="tooltip" data-bs-placement="top"
+                <button type="button" id="restore-modal-btn" data-id="{{ crew.id }}" class="btn btn-success" data-bs-toggle="tooltip" data-bs-placement="top"
                     title="Restore Account">
                     <span data-feather="unlock" data-id="{{ crew.id }}"></span>
                     {{ _('Restore') }}
@@ -76,7 +76,7 @@
                 </button>
                 {% endif %}
                 {% if crew.status in ['created', 'active', 'inactive'] %}
-                <button type="button" data-id="{{ crew.id }}" class="btn btn-warning text-dark del-msg-btn" data-bs-toggle="tooltip"
+                <button type="button" id="suspend-modal-btn" data-id="{{ crew.id }}" class="btn btn-warning text-dark" data-bs-toggle="tooltip"
                     data-bs-placement="top" title="Suspend Account">
                     <span data-feather="alert-triangle" data-id="{{ crew.id }}"></span>
                     {{ _('Suspend') }}
@@ -84,14 +84,14 @@
                 {% endif %}
                 &nbsp;
                 {% if crew.status in ['created', 'active', 'inactive', 'suspended'] %}
-                <button type="button" data-id="{{ crew.id }}" class="btn btn-danger del-msg-btn ml-4" data-bs-toggle="tooltip"
+                <button type="button" id="delete-crew-btn" data-id="{{ crew.id }}" class="btn btn-danger ml-4" data-bs-toggle="tooltip"
                     data-bs-placement="top" title="Delete Account">
                     <span data-feather="trash-2" data-id="{{ crew.id }}"></span>
                     {{ _('Delete') }}
                 </button>
                 {% endif %}
                 {% if crew.status == 'deleted' %}
-                <button type="button" data-id="{{ crew.id }}" class="btn btn-success" data-bs-toggle="tooltip" data-bs-placement="top"
+                <button type="button" id="restore-modal-btn" data-id="{{ crew.id }}" class="btn btn-success" data-bs-toggle="tooltip" data-bs-placement="top"
                     title="Restore Account">
                     <span data-feather="unlock" data-id="{{ crew.id }}"></span>
                     {{ _('Restore') }}
@@ -138,4 +138,125 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="del_account_modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ _('Delete Account?') }}</h5>
+            </div>
+            <div class="modal-body text-center">
+                <p>{{ _('Are you sure you want to delete this account?') }}</p>
+            </div>
+            <div class="modal-footer" id="del-modal-actions">
+                <button type="button" data-bs-dismiss="modal" class="btn btn-secondary">{{ _('Cancel') }}</button>
+                <button type="button" class="btn btn-danger" data-id="{{ crew.id }}" id="btn-delete-crew">{{ _('Delete') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="suspend_account_modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ _('Suspend Account?') }}</h5>
+            </div>
+            <div class="modal-body text-center">
+                <p>{{ _('Are you sure you want to suspend this account?') }}</p>
+            </div>
+            <div class="modal-footer" id="del-modal-actions">
+                <button type="button" data-bs-dismiss="modal" class="btn btn-secondary">{{ _('Cancel') }}</button>
+                <button type="button" class="btn btn-warning" data-id="{{ crew.id }}" id="btn-suspend-crew">{{ _('Suspend')
+                    }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="restore_account_modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ _('Restore Account?') }}</h5>
+            </div>
+            <div class="modal-body text-center">
+                <p>{{ _('Are you sure you want to restore this account?') }}</p>
+            </div>
+            <div class="modal-footer" id="del-modal-actions">
+                <button type="button" data-bs-dismiss="modal" class="btn btn-secondary">{{ _('Cancel') }}</button>
+                <button type="button" class="btn btn-success" data-id="{{ crew.id }}" id="btn-restore-crew">{{
+                    _('Restore')
+                    }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var options = {
+        backdrop: 'static'
+    }
+    var delCrewModal = new bootstrap.Modal(document.getElementById('del_account_modal'), options)
+    var modalbtn = document.getElementById('delete-crew-btn');
+    if (modalbtn) {
+        modalbtn.addEventListener('click', function (e) {
+            delCrewModal.show();
+        });
+    }
+    
+    var actionButtons = document.getElementById('del_account_modal');
+    actionButtons.addEventListener('click', function (e) {
+        
+        if (e.target && e.target.id == 'btn-delete-crew') {
+
+            var url = "{{ url_for('home_admin_crew_route', id='')}}"
+            url = url + e.target.dataset.id;
+            fetch(url, {
+                method: 'DELETE'
+            })
+            .then(location.assign("{{ url_for('home_admin_crews_route')}}"))
+        }
+    });
+
+    var suspendCrewModal = new bootstrap.Modal(document.getElementById('suspend_account_modal'), options)
+    var modalbtn = document.getElementById('suspend-modal-btn');
+    if (modalbtn) {
+        modalbtn.addEventListener('click', function (e) {
+            suspendCrewModal.show();
+        });
+    }
+
+    var actionButtons = document.getElementById('suspend_account_modal');
+    actionButtons.addEventListener('click', function (e) {
+
+        if (e.target && e.target.id == 'btn-suspend-crew') {
+
+            var url = "{{ url_for('home_admin_crew_route', id='')}}"
+            url = url + e.target.dataset.id + '?action=suspend';
+            fetch(url, {
+                method: 'POST'
+            })
+                .then(location.assign("{{ url_for('home_admin_crews_route')}}"))
+        }
+    });
+
+    var restoreCrewModal = new bootstrap.Modal(document.getElementById('restore_account_modal'), options)
+    var modalbtn = document.getElementById('restore-modal-btn');
+    if (modalbtn) {
+        modalbtn.addEventListener('click', function (e) {
+            restoreCrewModal.show();
+        });
+    }
+
+    var actionButtons = document.getElementById('restore_account_modal');
+    actionButtons.addEventListener('click', function (e) {
+
+        if (e.target && e.target.id == 'btn-restore-crew') {
+
+            var url = "{{ url_for('home_admin_crew_route', id='')}}"
+            url = url + e.target.dataset.id + '?action=restore';
+            fetch(url, {
+                method: 'POST'
+            })
+                .then(location.assign("{{ url_for('home_admin_crews_route')}}"))
+        }
+    });
+</script>
 {% endblock %}

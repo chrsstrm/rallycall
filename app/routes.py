@@ -213,6 +213,11 @@ def home_del_message_route(id):
 @login_required
 @roles_accepted('crew_admin')
 def home_settings_route():
+    """
+    Option for the Crew Admin to add a Crew Name and 
+    'protect' the account by adding an Access Code.
+    Can also delete the Crew from this view. 
+    """
     crew = Crews.query.get(current_user.crew_id)
     form = CrewSettings(obj=crew)
     del_form = CrewDelete()
@@ -236,18 +241,104 @@ def home_settings_route():
 @login_required
 @roles_accepted('admin')
 def home_admin_crews_route():
+    """
+    System Admin route for viewing all Crews in the system. 
+    """
     page = request.args.get("page", 1, type=int)
     crews = Crews.query.paginate(page, app.config['POSTS_PER_PAGE'], True)
     next_url = url_for('home_admin_crews_route', page=crews.next_num) if crews.has_next else None
     prev_url = url_for('home_admin_crews_route', page=crews.prev_num) if crews.has_prev else None
     return render_template('home_crews.html', crews=crews.items)
 
-@app.route('/home/crews/<id>', methods=['GET','POST'])
+@app.route('/home/crews/<id>', methods=['GET','POST', 'DELETE'])
 @login_required
 @roles_accepted('admin')
 def home_admin_crew_route(id):
-    crew = Crews.query.get(id)
-    app.logger.debug(crew.members.all())
+    """
+    System Admin route for viewing details of a single Crew. 
+    Can delete or suspend Crew from this view.
+    """
+    try:
+        crew = Crews.query.get(id)
+        if not crew:
+            raise Exception('No crew found.')
+    except Exception as _:
+        flash('Could not access this Crew.', category='error')
+        return redirect(url_for('home_admin_crews_route'))
+
+    if request.method == 'DELETE':
+        """
+        System admin handler for 'deleting' a Crew. 
+
+        TODO: This can be refactored along with the crew-admin delete endpoint by 
+        adding Crew methods for deleting users and the Crew itself instead of 
+        repeating code in multiple endpoint handlers. 
+        """
+        try:
+            """
+            Deactivate all Crew users and change their status. 
+            active=False will not allow them to log in. 
+            """
+            users = Users.query.filter_by(crew_id=id).all()
+            for user in users:
+                user.active = False
+                user.status = 'deleted'
+            db.session.commit()
+        except Exception as _:
+            flash('Could not remove Crew members, please try again.', category='error')
+            return redirect(url_for('home_admin_crew_route', id=id))
+        
+        try:
+            """
+            Change the Crew status to deleted
+            """
+            crew.status = 'deleted'
+            db.session.commit()
+        except Exception as _:
+            flash('Could not remove Crew, please try again.', category='error')
+            return redirect(url_for('home_admin_crew_route', id=id))
+
+        flash('Crew deleted.', category='success')
+        return redirect(url_for('home_admin_crews_route'))
+
+    if request.method == 'POST':
+        """
+        This handler will look for the 'action' param to determine 
+        whether we are going to restore or suspend the account.
+        """
+        if 'action' in request.args:
+            if request.args.get('action') == 'suspend':
+                """
+                Set status of the Crew to suspended.
+                This will not prevent the admin or users from 
+                logging in, but they cannot listen to or record messages.
+                """
+                crew.status = 'suspended'
+                db.session.commit()
+                flash('Crew suspended.', category='success')
+                return redirect(url_for('home_admin_crew_route', id=id))
+            if request.args.get('action') == 'restore':
+                """
+                Restore a Crew.
+                This will change the status of the Crew and restore login 
+                access for all users. 
+                This could conflict with a user that was previously removed from 
+                a Crew, but I'm not sure how to solve this given the structure we 
+                currently have. YOLO. 
+                """
+                crew.status = 'active'
+                db.session.commit()
+                users = Users.query.filter_by(crew_id=id).all()
+                for user in users:
+                    user.active = True
+                    user.status = 'active'
+                db.session.commit()
+                flash('Crew restored.', category='success')
+                return redirect(url_for('home_admin_crew_route', id=id))
+        else:
+            flash('Invalid request.', category='error')
+            return redirect(url_for('home_admin_crew_route', id=id))
+
     admins = crew.members.filter_by(crew_admin = True).all()
     return render_template('home_crew.html', crew=crew, admins=admins)
 
@@ -561,6 +652,7 @@ def system_err(e):
 TODO items
 
 TODO - build out crew members dashboard
+TODO - change crew status to active after any message activity
 TODO - fix dashboard mobile nav
 TODO - fix messages mobile nav
 TODO - the JS location.assign after message del is losing the flash success message. 
