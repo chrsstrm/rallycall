@@ -1,0 +1,57 @@
+spec:
+  name: rally-call
+  services:
+    - name: web
+      git:
+        branch: main
+        repo_clone_url: https://github.com:chrsstrm/rallycall.git
+  databases:
+    - name: rallycall_db
+  envs:
+  - key: DATABASE_URL
+    scope: RUN_TIME
+    value: ${rallycall_db.DATABASE_URL}
+  - key: FLASK_APP
+    value: rallycall.py
+    scope: RUN_TIME
+  - key: FLASK_ENV
+    value: 'production'
+    scope: RUN_TIME
+  - key: SECURITY_PASSWORD_SALT
+    value: 'placeholder'
+    scope: RUN_TIME
+    type: SECRET
+  - key: BOOTSTRAP_ADMIN_PASS
+    value: 'placeholder'
+    scope: RUN_TIME
+    type: SECRET
+  - key: BOOTSTRAP_ADMIN_EMAIL
+    value: 'placeholder@placeholder.me'
+    scope: RUN_TIME
+  - key: APP_BASE_URL
+    value: ${APP_URL}
+    scope: RUN_TIME
+  - key: APP_NAME
+    value: 'Rally Call'
+    scope: RUN_TIME
+  - key: CREW_ACCOUNT_PIN_LENGTH
+    value: 6
+    scope: RUN_TIME
+  - key: TWILIO_VOICE_SETTING
+    value: 'Polly.Matthew'
+    scope: RUN_TIME
+  - key: TWILIO_RECORDING_MAXLENGTH
+    value: 300
+    scope: RUN_TIME
+  - key: TWILIO_INBOUND_NUMBER
+    value: '+1PLACEHOLDER'
+    scope: RUN_TIME
+  - key: TWILIO_ACCOUNT_SID
+    value: 'placeholder'
+    scope: RUN_TIME
+    type: SECRET
+  - key: TWILIO_AUTH_TOKEN
+    value: 'placeholder'
+    scope: RUN_TIME
+    type: SECRET
+  
